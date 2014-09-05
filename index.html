@@ -16,7 +16,7 @@
     <script>
  
     // create an new instance of a pixi stage
-    var stage = new PIXI.Stage(0x66FF99);
+    var stage = new PIXI.Stage(0xFFFFFF);
  
     // create a renderer instance.
     var renderer = PIXI.autoDetectRenderer(400, 300);
@@ -46,6 +46,8 @@
  
     //stage.addChild(bunny);
  
+    var w = new World().setLevel(0).generateRects(stage);
+
     function animate() {
  
         requestAnimFrame( animate );
@@ -59,9 +61,10 @@
 
         // render the stage  
         renderer.render(stage);
+        w.Move(stage);
     }
  
     </script>
- <canvas id='tmpCanvas' ></canvas>
+
     </body>
 </html>
