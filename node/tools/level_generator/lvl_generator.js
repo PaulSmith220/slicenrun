@@ -1,4 +1,4 @@
-'use strict';
+
 
 var PNG = require('png-js');
 var fs = require("fs");
@@ -34,6 +34,7 @@ function getFiles(dir,files_){
 }
 var files = getFiles('images');
 var images = [];
+var imgReady = 0;
 for (var i = 0; i < files.length; i++) {
 	if (files[i].indexOf('.png') != -1)
 		images.push(files[i]);
@@ -41,6 +42,11 @@ for (var i = 0; i < files.length; i++) {
 if (images.length == 0) {
 	console.warn('No images found! Expext .png images in /images/ directory.');
 } else {
+	fs.writeFile("codes/levels.js", '');
+		var fStream = fs.createWriteStream("codes/levels.js", {
+			flags: "a",
+			encoding: "utf-8"
+		});
 	var levels = {};
 	console.log('Found images: ', images);
 	for (var i = 0; i < images.length; i ++){
@@ -49,7 +55,9 @@ if (images.length == 0) {
 		var w = myimage.width;
 		var h = myimage.height;
 		levels[images[i].split('/')[1]] = "none";
-		myimage.decode( function(pixels) {
+
+		function decode(img, i) {
+		img.decode(function(i) { return function(pixels) {
 			var lvl = [];
 			for (var y = 0; y < h; y++) {
 				var str = [];
@@ -63,22 +71,16 @@ if (images.length == 0) {
 				}
 				lvl.push(str);
 			}
-			for (var n in levels) {
-				if (levels[n] == "none") {
-					levels[n] = lvl;
-					var lvlStr = JSON.stringify(lvl);
-					lvlStr = lvlStr.replace(/],/g, "],\n");
-					fs.writeFile("codes/" + n.split('.png')[0] + '.js', "Map.levels.push({Name: '" + n.split('.png')[0] + "', Map:" + lvlStr + "});", function(err) {
-						if (err) {
-							console.log('Error writing file codes/' + n);
-							console.log(err);
-						} else {
-							console.log('File writed: ' + "codes/" + n.split('.png')[0] + '.js');
-						}
-					})
-				}
-			}
-		});
+
+			var lvlStr = JSON.stringify(lvl).replace(/],/g, "],\n");
+			fStream.write("Map.levels.push({Name: '" + images[i].split('.png')[0] + "', Map:" + lvlStr + "});\n");
+			console.log("Level '" + images[i] + "' writed");
+			
+		}}(i));
 	}
+	decode(myimage, i);
+	}
+
+	
 
 }
